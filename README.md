@@ -16,23 +16,23 @@ Cofre uses Shamir Secret Sharing Scheme (SSSS) to split the key between all part
  - Bob asks to Cofre to create a new vault with an identifier X
  - Cofre creates a new vault with an identifier of X and set Bob as it's owner
  - Cofre then generates a new 256-bit AES key
- - Cofre uses SSSS to generate 8 shares from the key, with a threshold of 4
+ - Cofre uses SSSS to generate 4 shares from the key, with a threshold of 2
  - Cofre tells Bob to connect another device in the transaction using the vault identifier X
  - Bob connects his smartphone in the transaction of vault X
- - Cofre gives 2 shares to Bob's first device, 2 shares to Bob's smartphone, and keep 2 shares.
+ - Cofre gives 1 share to Bob's first device, 1 share to Bob's smartphone, and keep 2 shares.
  - Before giving any shares, Cofre logs the share hash, with key creation date and share owner
- - Cofre then store the hash of the remaining 2 shares, store the hashes in a special place, encrypt the shares and give them to Bob
- - Cofre then tells Bob that these last 2 shares are special, and that he should keep it stored in a piece of paper or something like that
+ - Cofre then store the hash of the remaining share in a special place, encrypt the share and give it to Bob
+ - Cofre then tells Bob that this last share is special, and that he should keep it stored in a piece of paper or something like that
 
 ##### I'm not getting it yet...
-Well, if the threshold of the Secret Sharing is 4, so Bob only needs 4 shares to recover the AES key, so he can recover that using his first device and his secondary device. Each device should have 2 shares, raising the need of at least 2 devices to recover the secret.
+Well, if the threshold of the Secret Sharing is 2, so Bob only needs 2 shares to recover the AES key, so he can recover that using his first device and his secondary device. Each device should have 1 share, raising the need of at least 2 devices to recover the secret.
 
 ##### Okay, now I get it. But what about the other shares?
-Let's say Bob wants Alice to have access to the vault X, but Bob couldn't give his shares to Alice, so he needs that Cofre give Alice 4 more shares in order for her to have access to the vault.
+Let's say Bob wants Alice to have access to the vault X, but Bob couldn't give his share to Alice, so he needs that Cofre give Alice 2 more shares in order for her to have access to the vault.
 
-The "special" 2 shares that Cofre gave Bob are called "Recovery Shares", which Bob should use whenever he wants to add someone to the vault or has lost his own shares.
+The "special" share that Cofre gave Bob is called "Recovery Share", which Bob should use whenever he wants to add someone to the vault or has lost his own shares.
 
-With the Recovery Shares, anyone could:
+With the Recovery Share, anyone could:
  - Add a new participant to the vault
  - Bans a participant from the vault
  - Recover one or more lost shares
@@ -41,14 +41,14 @@ With the Recovery Shares, anyone could:
 But it's not possible to use the Recovery Shares in the process of recovering the secret, because they are encrypted with a Cofre secret key, so only Cofre can manage those shares.
 
 ##### What about the server shares?
-Well, in the case of adding a new participant or banning a participant, Bob should give 2 of his own shares and the 2 Recovery Shares.
+Well, in the case of adding a new participant or banning a participant, Bob should give 1 of his own shares and the Recovery Share.
 
-But what if Bob lost all his shares? In that case the server could use his own 2 shares together with Bob's Recovery Share to generate more shares and give them to Bob!!!
+But what if Bob lost all his shares? In that case the server could use his own share together with Bob's Recovery Share to generate more shares and give them to Bob!!!
 
-Besides that, for a vault key reset, it's necessary that the owner give his 6 shares (including the Recovery Shares) and the server will use it's own keys to validate those and generate a new key for Bob.
+Besides that, for a vault key reset, it's necessary that the owner give his 3 shares (including the Recovery Share) and the server will use it's own share to validate those and generate a new key for Bob.
 
-##### And what about the lost of the Recovery Shares?
-In that case, Bob should give his 4 shares to the server, that would generate a new one.
+##### And what about the lost of the Recovery Share?
+In that case, Bob should give his 2 shares to the server, that would generate a new one.
 
 ##### But anyone with shares could do that, right?
 Right! ... and wrong. When Cofre generates the shares, he stores each share hash with it's corresponding owner and device, so he just checks those information, looking for the owner shares hashes, before doing anything. So, if the hash match with the owner's hashes, it must be Bob's!
