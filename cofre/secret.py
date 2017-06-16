@@ -3,6 +3,13 @@ from Crypto.Util import number
 
 class SecretSharing(object):
     def __init__(self, num_shares, threshold):
+        if(num_shares < 1):
+            raise ValueError("At least 1 share is needed")
+        if(threshold < 1):
+            raise ValueError("The threshold must be of at least 1")
+        if(num_shares < threshold):
+            raise ValueError("Threshold must be less or equal \
+            than the number of shares")
         self.num_shares = num_shares
         self.threshold = threshold
         self.prime = number.getPrime(256)
@@ -21,9 +28,9 @@ class SecretSharing(object):
     def reconstruct_secret(self, shares):
         share_set = set(shares)
         if (len(share_set) < len(shares)):
-            raise Exception('provided duplicate share')
+            raise ValueError('provided duplicate share')
         if (len(share_set) < self.threshold):
-            raise Exception('insufficient shares')
+            raise ValueError('insufficient shares')
         
         secret = 0
         
