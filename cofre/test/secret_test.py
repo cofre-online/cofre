@@ -69,5 +69,6 @@ class SecretSharingTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             ss.generate_new_share(shares, -5)
 
+
 if __name__ == '__main__':
     unittest.main()

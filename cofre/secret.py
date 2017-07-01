@@ -1,5 +1,6 @@
 from Crypto.Random import random
 from Crypto.Util import number
+from sympy import Symbol, Poly
 
 class SecretSharing(object):
     def __init__(self, num_shares, threshold):
@@ -20,14 +21,18 @@ class SecretSharing(object):
         prime = number.getPrime(256)
 
         for i in range(1, self.threshold):
-            coefficients.append(random.randrange(prime))
+            while True:
+                coeff = random.randrange(prime)
+                if coeff not in coefficients:
+                    coefficients.append(coeff)
+                    break
 
-        shares = self._get_points(self.num_shares, coefficients, prime)
+        shares = self.__get_points(self.num_shares, coefficients, prime)
 
         return shares
 
     def reconstruct_secret(self, shares):
-        share_set = self._share_set(shares)
+        share_set = self.__share_set(shares)
         prime = share_set[0][2]
         secret = 0
         
@@ -46,40 +51,58 @@ class SecretSharing(object):
         return secret
 
     def generate_new_share(self, shares, num):
-        share_set = self._share_set(shares)
+        if num < 2:
+            raise ValueError('invalid share number')
+
+        share_set = self.__share_set(shares)
         prime = share_set[0][2]
 
-        coefficients = self._recover_polynomial(share_set)
+        coefficients = self.__recover_polynomial(share_set)
 
-        return (num, self._get_point(num, coefficients, prime))
+        return (num, self.__get_point(num, coefficients, prime), prime)
 
-    def _share_set(self, shares):
+    def __share_set(self, shares):
         share_set = set(shares)
         if (len(share_set) < len(shares)):
             raise ValueError('provided duplicate share')
         if (len(share_set) < self.threshold):
             raise ValueError('insufficient shares')
 
-        return share_set
+        return list(share_set)
 
 
-    def _get_points(self, n, coefficients, prime):
+    def __get_points(self, n, coefficients, prime):
         points = []
         for i in range(n):
             x = i + 1
-            fx = self._get_point(x, coefficients)
+            fx = self.__get_point(x, coefficients, prime)
             points.append((x, fx, prime))
 
         return points
 
-    def _get_point(self, x, coefficients, prime):
+    def __get_point(self, x, coefficients, prime):
         fx = 0
         for j in range(len(coefficients)):
             fx += coefficients[j] * pow(x, j, prime)
         
         return fx
 
-    def _recover_polynomial(self, shares):
-        prime = shares[0][2]
+    def __recover_polynomial(self, shares):
+        x = Symbol('x')
+        polynomial = 0
 
         for i in range(self.threshold):
+            y = shares[i][1]
+
+            numerator = 1
+            denominator = 1
+
+            for j in range(self.threshold):
+                if i == j:
+                    continue
+                numerator = numerator * (x - shares[j][0])
+                denominator = denominator * (shares[i][0] - shares[j][0])
+
+            polynomial = polynomial + (y * (numerator / denominator))
+
+        return list(reversed(Poly(polynomial, gen=x).all_coeffs()))
