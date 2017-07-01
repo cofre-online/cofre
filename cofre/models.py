@@ -24,3 +24,39 @@ class Cofre(Namespace):
 
     def on_key_renew(self, vault, shares):
         pass
+
+class Vault(object):
+    def __init__(self, name, description, owner):
+        self.name = name
+        self.description = description
+        self.owner = owner
+        self.key = None
+        self.opened = False
+        self.participants = []
+
+    def open(self, user, key):
+        pass
+
+    def close(self):
+        pass
+    
+    def store(self, data):
+        pass
+
+    def get(self, object_id):
+        pass
+
+    def get_all(self):
+        pass
+
+    def remove(self, data):
+        pass
+
+    def destroy(self):
+        pass
+
+    def update(self, object_id, new_value):
+        pass
+
+    def is_opened(self):
+        return self.opened
